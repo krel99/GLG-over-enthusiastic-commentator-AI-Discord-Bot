@@ -5,7 +5,7 @@
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import { createClient } from "@supabase/supabase-js";
-import { retrieveAllRows } from "./postgresDatabaseUtilities";
+import { retrieveAllRows } from "../localPostgresDb/postgresFunctions";
 import color from "colors";
 import { Document } from "langchain/document";
 color.enable();

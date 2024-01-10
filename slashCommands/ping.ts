@@ -10,7 +10,3 @@ export async function execute(interaction: CommandInteraction) {
     return;
   }
 }
-
-// Prevest na otazku
-
-// Vyhledat fakta ve vektorove databaze

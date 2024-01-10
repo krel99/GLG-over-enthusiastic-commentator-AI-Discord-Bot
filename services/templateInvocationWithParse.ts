@@ -5,7 +5,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import color from "colors";
 color.enable();
-import retrieveContext from "./retrieveFromVectorDb";
+import retrieveContext from "./vectorDb/retrieveFromVectorDb";
 import excitementExamples from "../utilities/excitementExample";
 
 const standaloneQuestionTemplate = `Convert to a standalone question.

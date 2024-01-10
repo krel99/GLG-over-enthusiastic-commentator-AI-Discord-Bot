@@ -7,7 +7,7 @@ import { executablePath, Browser } from "puppeteer";
 import colors from "colors";
 colors.enable();
 
-import { createTable, insertData } from "./postgresDatabaseUtilities";
+import { createTable, insertData } from "./postgresFunctions";
 
 puppeteer.use(StealthPlugin());
 
