@@ -20,7 +20,7 @@ if (!OPEN_AI_KEY) {
   throw new Error("OPENAI environment variable is not set");
 }
 
-const chatModel = new ChatOpenAI({ openAIApiKey: OPEN_AI_KEY });
+const chatModel = new ChatOpenAI({ openAIApiKey: OPEN_AI_KEY, temperature: 0.3, modelName: "gpt-4-0613" });
 
 // create a new Client instance
 const client = new Client({
@@ -100,22 +100,24 @@ client.on(Events.MessageCreate, async (message: Message) => {
     return reaction.emoji.name === KITCHEN_KNIFE_EMOJI;
   };
 
-  const collector = message.createReactionCollector({ filter: collectorFilter, time: 30_000 });
+  const collector = message.createReactionCollector({ filter: collectorFilter, time: 240_000 });
 
   collector.on("collect", async (reaction, user) => {
     console.log(`Collected ${reaction.emoji.name} from ${user.tag}`);
     console.log(message.content);
     try {
-      message.channel.send("Thinking...");
+      // message.channel.send("Thinking...");
       const response = await templateInvocationWithParse(chatModel, message.content);
       if (typeof response === "undefined") {
         await message.channel.send("I don't know what to say");
         throw new Error("Response is undefined");
       }
       await message.channel.send(response);
-      console.log(response);
+      // console.log(response);
     } catch (error) {
       console.error(error);
+    } finally {
+      collector.stop();
     }
   });
 

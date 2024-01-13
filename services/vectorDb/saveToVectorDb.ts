@@ -1,4 +1,4 @@
-// bun services/saveToVectorDb.ts
+// bun services/vectorDb/saveToVectorDb.ts
 //
 // this shows how to prepare database on Supabase's side: https://js.langchain.com/docs/integrations/vectorstores/supabase/
 //
@@ -23,7 +23,7 @@ if (!OPEN_AI_KEY || !SUPABASE_PROJECT_URL || !SUPABASE_PROJECT_API) {
   throw new Error("An environment variable is missing!");
 }
 
-const model = new OpenAIEmbeddings({ openAIApiKey: OPEN_AI_KEY, batchSize: 2000, stripNewLines: true, maxRetries: 3 });
+const model = new OpenAIEmbeddings({ openAIApiKey: OPEN_AI_KEY, batchSize: 512, stripNewLines: true, maxRetries: 3 });
 const client = createClient(SUPABASE_PROJECT_URL, SUPABASE_PROJECT_API);
 
 async function processRows() {
