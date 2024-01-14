@@ -8,6 +8,7 @@ import { ApplicationCommandData } from "discord.js";
 
 const token = process.env.DISCORD_TOKEN;
 const guildId = process.env.GUILD_ID;
+// const guildId = process.env.SKIPPLES_GUILD;
 const clientId = process.env.CLIENT_ID;
 
 // TODO asynchronous readdir instead of readdirSync
