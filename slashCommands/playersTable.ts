@@ -36,7 +36,5 @@ export async function execute(interaction: CommandInteraction) {
     description: "List of players, open in LibreOffice, Excel or Google Tables",
   });
 
-  console.log(attachment);
-
   await interaction.editReply({ content: "Open in LibreOffice, Excel or Google Tables.", files: [attachment] });
 }

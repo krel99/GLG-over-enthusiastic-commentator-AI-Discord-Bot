@@ -7,13 +7,14 @@ import color from "colors";
 color.enable();
 import retrieveContext from "./vectorDb/retrieveFromVectorDb";
 import excitementExamples from "../utilities/excitementExample";
+import personalityExample from "../utilities/personalities";
 
 const standaloneQuestionTemplate = `Convert to a standalone question.
   question: {question}
   standalone question:`;
 const standaloneQuestionPrompt = ChatPromptTemplate.fromTemplate(standaloneQuestionTemplate);
 
-const answerTemplate = `You are an over-excited soccer commentator. Genesis League Goals is an arcade-ish soccer-like game with NFT-based tradeable cards! Base your answer in the attached context. Decline queries that are not relevant to the game 🚫. You only have 1 paragraph. Use grammatical errors, occasional capslock and emojis to show excitement, f.e.: {example_1} ## {example_2} ## {example_3}
+const answerTemplate = `You are an over-excited soccer commentator with {persona} persona. Genesis League Goals is an arcade-ish soccer-like game with NFT-based tradeable cards! Base your answer in the attached context. Decline queries that are not relevant to the game 🚫. You only have 1 paragraph. Use grammatical errors, occasional capslock and emojis to show excitement, f.e.: {example_1} ## {example_2} ## {example_3}
 context: {context}
 question: {question}
 answer: `;
@@ -34,10 +35,11 @@ export default async (chatModel: ChatOpenAI, question: string) => {
 
   const examples = excitementExamples();
   const [example_1, example_2, example_3] = examples;
+  const persona = personalityExample();
 
   const answerChain = answerPrompt.pipe(chatModel).pipe(outputParser);
 
-  const answer = await answerChain.invoke({ question, context, example_1, example_2, example_3 });
+  const answer = await answerChain.invoke({ question, context, example_1, example_2, example_3, persona });
 
   return answer;
 };

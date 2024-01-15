@@ -15,7 +15,7 @@ const excitementExamples = [
 ];
 
 /**
- * @returns {string} A random excitement example
+ * @returns {string[]} 3 random excitement examples
  */
 export default () => {
   const randomIndices: string[] = [];
