@@ -6,7 +6,7 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import color from "colors";
 color.enable();
 import retrieveContext from "./vectorDb/retrieveFromVectorDb";
-import excitementExamples from "../utilities/excitementExample";
+import excitementExamples from "../utilities/excitementPrompts";
 import personalityExample from "../utilities/personalities";
 
 const standaloneQuestionTemplate = `Convert to a standalone question.

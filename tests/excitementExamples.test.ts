@@ -1,5 +1,7 @@
+// bun test excitementExamples.test.ts
+
 import { test, expect, describe, spyOn } from "bun:test";
-import excitementExamples from "../utilities/excitementExample.ts";
+import excitementExamples from "../utilities/excitementPrompts.ts";
 
 describe("excitementExamples Functionality", () => {
   test("Returns an array of length 3", () => {
