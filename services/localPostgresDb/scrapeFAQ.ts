@@ -1,4 +1,4 @@
-// bun scrapeSave.ts
+// bun services/localPostgresDb/scrapeFAQ.ts
 // this app will scrape the GLG help page and save the articles to a database
 // ! postgress server needs to be running for this to work
 import puppeteer from "puppeteer-extra";
@@ -19,7 +19,7 @@ puppeteer.use(StealthPlugin());
 
   // Find a page, then wait till it loads
   const page = await browser.newPage();
-  // await page.goto(""); // ! -- link removed
+  await page.goto("https://support-goals.genesisleaguesports.com/hc/en-us");
   const element = await page.waitForSelector(".promoted-articles-item");
 
   if (!element) {
@@ -46,6 +46,7 @@ puppeteer.use(StealthPlugin());
 
   console.log(promotedArticlesURLs);
 
+  // * For better functionality, here the texts should be retrieved as HTML, then parsed with langChain textSplitters
   for (const articleURL of promotedArticlesURLs) {
     await page.goto(articleURL);
     await page.waitForSelector(".article-info");

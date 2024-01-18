@@ -8,6 +8,8 @@ import { createClient } from "@supabase/supabase-js";
 import { retrieveAllRows } from "../localPostgresDb/postgresFunctions";
 import color from "colors";
 import { Document } from "langchain/document";
+import { headersSplitter } from "../../utilities/textSplitters";
+import { QueryResult } from "pg";
 color.enable();
 
 type DocumentWithVector = {
@@ -27,7 +29,7 @@ const model = new OpenAIEmbeddings({ openAIApiKey: OPEN_AI_KEY, batchSize: 512, 
 const client = createClient(SUPABASE_PROJECT_URL, SUPABASE_PROJECT_API);
 
 async function processRows() {
-  const data = await retrieveAllRows("GLG_Help_Articles");
+  const data: QueryResult | undefined = await retrieveAllRows("GLG_Help_Articles");
 
   if (!data) {
     throw new Error("No data retrieved from the database!");
@@ -70,9 +72,3 @@ try {
 }
 
 console.log(`[Success]`.yellow + ` Embeddings saved to Supabase. `);
-
-// const retrieved = await vectorStore.similaritySearchVectorWithScore(vectorsQuestion, 1);
-// // const retrieved = await vectorStore.similaritySearch(query, 1);
-
-// console.log(`[Success]`.green + ` Retrieved: `);
-// console.log(retrieved);

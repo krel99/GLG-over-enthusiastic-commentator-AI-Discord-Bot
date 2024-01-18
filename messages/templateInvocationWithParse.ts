@@ -5,7 +5,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import color from "colors";
 color.enable();
-import retrieveContext from "./vectorDb/retrieveFromVectorDb";
+import retrieveContext from "../services/vectorDb/retrieveFromVectorDb";
 import excitementExamples from "../utilities/excitementPrompts";
 import personalityExample from "../utilities/personalities";
 
@@ -29,10 +29,10 @@ export default async (chatModel: ChatOpenAI, question: string) => {
 
   // * works
   // [1][0].pageContent)
-  const contextString = await retrieveContext(standaloneQuestion);
+  const fullContext = await retrieveContext(standaloneQuestion);
 
-  const context = await contextString[0][0].pageContent; //+ " " + contextString[1][0].pageContent;
-
+  // !
+  const context = await fullContext[0][0].pageContent; //+ " " + contextString[1][0].pageContent;
   const examples = excitementExamples();
   const [example_1, example_2, example_3] = examples;
   const persona = personalityExample();
@@ -41,7 +41,7 @@ export default async (chatModel: ChatOpenAI, question: string) => {
 
   const answer = await answerChain.invoke({ question, context, example_1, example_2, example_3, persona });
 
-  return answer;
+  return { answer, fullContext };
 };
 
 // const OPEN_AI_KEY = process.env.OPENAI;

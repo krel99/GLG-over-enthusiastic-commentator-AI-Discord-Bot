@@ -6,7 +6,7 @@ import colors from "colors";
 colors.enable();
 
 import { createTable, insertData } from "./postgresFunctions";
-import { Element, Node } from "cheerio";
+import { headersSplitter } from "../../utilities/textSplitters";
 
 puppeteer.use(StealthPlugin());
 
@@ -16,9 +16,10 @@ const preSelectedURLs: string[] = [
 ];
 
 (async () => {
+  // async function scrapePeakD() {
   //Prepare the environment
   const browser = await puppeteer.launch({ headless: "new", executablePath: executablePath() });
-  //   await createTable("GLG_Help_Articles");
+  await createTable("GLG_Help_Articles");
   const page = await browser.newPage();
 
   // Traverse URLs
@@ -32,7 +33,6 @@ const preSelectedURLs: string[] = [
         let textBody = ""; //element.outerHTML;
         for (const child of element.children) {
           if (child.tagName == "HR") break;
-          // ! This is horrible handling of tables, create handleTable function
           if (child.classList.contains("table-responsive")) {
             textBody += child.outerHTML + "\n";
             continue;
@@ -41,12 +41,17 @@ const preSelectedURLs: string[] = [
         }
         return textBody;
       });
-      await insertData("GLG_Help_Articles", articleURL, articleTitle, articleBody);
+
+      const articleChunks = await headersSplitter(articleBody, 1600, 300);
+
+      for (const chunk of articleChunks) {
+        await insertData("GLG_Help_Articles", articleURL, articleTitle, chunk.pageContent);
+        console.log(chunk.pageContent);
+      }
     } catch (error: any) {
       console.error(`Error fetching ${articleURL}: ${error.message}`);
     }
   }
   await browser.close();
+  // }
 })();
-
-// fetchAndParseURLs(preSelectedURLs);

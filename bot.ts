@@ -1,9 +1,12 @@
 // bun bot.ts
 import fs from "node:fs";
 import path from "node:path";
-import { Client, Collection, Emoji, Events, GatewayIntentBits, Message, MessageReaction, User } from "discord.js";
+import { Client, Collection, Events, GatewayIntentBits, Message, MessageReaction, User } from "discord.js";
 import { ChatOpenAI } from "@langchain/openai";
-import templateInvocationWithParse from "./services/templateInvocationWithParse";
+import templateInvocationWithParse from "./messages/templateInvocationWithParse";
+import color from "colors";
+import { createFeedbackTable, insertFeedbackData } from "./services/localPostgresDb/postgresFunctions";
+color.enable();
 declare module "discord.js" {
   interface Client {
     commands: Collection<string, any>;
@@ -12,6 +15,14 @@ declare module "discord.js" {
 
 const KITCHEN_KNIFE_EMOJI = "🤖";
 const TWO_KITCHEN_KNIFE_EMOJIS = "🔪🔪";
+
+const RATING_STABBING = "🔪";
+const RATING_SHARP = "🗡️";
+const RATING_OK = "🪓";
+const RATING_NOT_SHARP = "🖊️";
+const RATING_DULL = "🪑";
+// create feedback table if it doesn't exist
+createFeedbackTable("Feedback");
 
 // initiate OpenAI chat model
 const OPEN_AI_KEY = process.env.OPENAI;
@@ -65,20 +76,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     console.error(`Command ${interaction.commandName} not found`);
   }
 
-  if (interaction.commandName === "ping") {
-    try {
-      await interaction.deferReply();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      await interaction.editReply("Pong!");
-    } catch (error) {
-      if (!interaction.replied && !interaction.deferred) {
-        console.error(error);
-        await interaction.reply({ content: "There was an error while executing the ping command!", ephemeral: true });
-      }
-      return;
-    }
-  }
-
   try {
     await command.execute(interaction);
   } catch (error) {
@@ -90,11 +87,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-/**
- * collect :kitchen-knife: :knife: reactions
- * TODO on:collect invoke runnable sequence
- */
-// ! MessageReaction may be invalid type
+// listen for requests for automated answer
 client.on(Events.MessageCreate, async (message: Message) => {
   const collectorFilter = (reaction: MessageReaction, user: User) => {
     return reaction.emoji.name === KITCHEN_KNIFE_EMOJI;
@@ -102,22 +95,47 @@ client.on(Events.MessageCreate, async (message: Message) => {
 
   const collector = message.createReactionCollector({ filter: collectorFilter, time: 240_000 });
 
-  collector.on("collect", async (reaction, user) => {
+  collector.once("collect", async (reaction, user) => {
     console.log(`Collected ${reaction.emoji.name} from ${user.tag}`);
-    console.log(message.content);
+
     try {
-      // message.channel.send("Thinking...");
-      const response = await templateInvocationWithParse(chatModel, message.content);
-      if (typeof response === "undefined") {
+      // create and send automated answer
+      let { answer, fullContext } = await templateInvocationWithParse(chatModel, message.content);
+      if (typeof answer === "undefined") {
         await message.channel.send("I don't know what to say");
         throw new Error("Response is undefined");
       }
-      await message.channel.send(response);
-      // console.log(response);
+      answer =
+        answer +
+        "\n\n" +
+        `Please rate my response from totally stabbing to pretty dull: ${RATING_STABBING}${RATING_SHARP}${RATING_OK}${RATING_NOT_SHARP}${RATING_DULL}`;
+      const responseMessage = await message.channel.send(answer);
+
+      // listen for the feedback on the automated answer from the user who asked
+      const collectorFilter = (reaction: MessageReaction, user: User) => {
+        const isRatingEmoji =
+          reaction.emoji.name === RATING_STABBING ||
+          reaction.emoji.name === RATING_SHARP ||
+          reaction.emoji.name === RATING_OK ||
+          reaction.emoji.name === RATING_NOT_SHARP ||
+          reaction.emoji.name === RATING_DULL;
+        const isUserWhoAsked = user.id === message.author.id;
+        return isRatingEmoji && isUserWhoAsked;
+      };
+      const responseCollector = responseMessage.createReactionCollector({ filter: collectorFilter, time: 240_000 });
+      responseCollector.once("collect", (reaction, user) => {
+        // TODO write the feedback to the database
+
+        console.log(`Collected ${reaction.emoji.name} from ${user.tag}`);
+        if (!reaction.emoji.name) return;
+        insertFeedbackData("Feedback", message.content, fullContext, responseMessage.content.split("\n")[0], reaction.emoji.name);
+
+        // console.log(`${message.content}`.blue);
+        // console.log(`${responseMessage.content.split("\n")[0]}`.green);
+        // console.log(`${fullContext}`.red)
+      });
     } catch (error) {
       console.error(error);
-    } finally {
-      collector.stop();
     }
   });
 

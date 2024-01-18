@@ -30,13 +30,3 @@ export default async (query: string): Promise<any> => {
   console.log(retrieved);
   return retrieved;
 };
-
-// async function testExport(query: string) {
-//   const vectorsQuestion = await model.embedQuery(query);
-//   const retrieved = await vectorStore.similaritySearchVectorWithScore(vectorsQuestion, 2);
-//   // retrieved.forEach((subArray) => {
-//   //   console.log(subArray[0].pageContent);
-//   // });
-//   return retrieved;
-// }
-// testExport("What does Genepool do?");
