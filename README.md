@@ -4,28 +4,6 @@ Running this application with all dependencies set (incl. enviromental variables
 
 The bot will convert the query to a standalone question, which will be converted to vector embeddings and tested against the database. In the current configuration, only the nearest match will be returned. Both, the original query and the database context is sent to ChatGPT's default model. An answer will be pasted to Discord as a message reply.
 
-## Installation
-
-### Prerequisities
-
--Bun.Js must be installed on your machine.
--An aplication is created on the Discord's side
--Supabase database is set and initialized with the given query
-
-### Run The App
-
-To install dependencies:
-
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run bot.ts
-```
-
 ## Detailed Functionality
 
 1. Initialize Application
@@ -63,3 +41,5 @@ bun run bot.ts
 7. Post Answer to Discord
    - Receive response from ChatGPT
    - Post as a message reply to the Discord channel
+8. Rating The Answer
+   - I user decides to rate the answer, it is saved to database along with the chunk and other relevant information
